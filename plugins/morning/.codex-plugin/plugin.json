@@ -1,0 +1,25 @@
+{
+  "name": "morning",
+  "version": "1.0.0",
+  "description": "Issue invoices (חשבונית מס/קבלה) and create payment links via Morning (Green Invoice). Use when the user wants to create an invoice, a receipt, or a payment link. Always previews before issuing a real document.",
+  "author": { "name": "AVIZ", "url": "https://atomi.biz" },
+  "homepage": "https://atomi.biz",
+  "license": "MIT",
+  "keywords": ["morning", "green-invoice", "invoice", "receipt", "חשבונית", "payment-link"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Morning",
+    "shortDescription": "חשבוניות ולינקים לתשלום דרך מורנינג",
+    "longDescription": "פלאגין Morning (Green Invoice) מאפשר ל-Codex להפיק חשבוניות מס/קבלה וליצור לינקים לתשלום. מתחברים פעם אחת עם מפתח ה-API של מורנינג. כל חשבונית עוברת קודם תצוגה מקדימה (preview) ורק אחרי אישור מפורש מונפקת בפועל - כדי שלא תופק חשבונית שגויה.",
+    "developerName": "AVIZ",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://atomi.biz",
+    "defaultPrompt": [
+      "הפק חשבונית מס/קבלה על 800 ש\"ח ללקוח",
+      "צור לי לינק לתשלום על 1500 ש\"ח",
+      "תראה לי preview של החשבונית לפני שמנפיקים"
+    ],
+    "brandColor": "#11CFD0"
+  }
+}
