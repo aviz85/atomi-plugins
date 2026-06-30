@@ -49,6 +49,20 @@ node scripts/hitl.mjs request "לאשר שליחת חשבונית 1,000 ש\"ח �
 
 This queues the task (`status: awaiting_reply`), sends the owner a WhatsApp approval message, and stores its id. **Do not perform the action now** - it waits for approval. Optional `--to <phone>` overrides the owner number.
 
+### Attach a file (PDF / image) to the approval
+
+When the decision needs the owner to *see* something - an invoice PDF, a poster, a contract - attach it. The file is sent as the approval message (with the text as its caption) and **stored in the brain** (`hitl-files/<id>-<name>`), so there is a durable record of exactly what was approved.
+
+```bash
+node scripts/hitl.mjs request "אישור חשבונית 1,200 ש\"ח לדני" \
+  --action "הנפק את החשבונית בפועל ושלח לדני" \
+  --file "/tmp/invoice-preview-1200.pdf"
+```
+
+The owner quote-replies to the **file** message exactly the same way (`כן` / `לא` / `תקן: ...`), and `poll` matches it the same way.
+
+**Invoice flow (with the Morning plugin):** run the Morning *preview* first (it produces a preview PDF), then pass that PDF to `hitl request --file`. Only after the owner approves do you issue the real invoice. Preview -> approve on WhatsApp -> issue.
+
 ## B) On wake (the automation runs this)
 
 ```bash

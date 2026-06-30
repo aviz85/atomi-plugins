@@ -56,6 +56,27 @@ async function call(env, method, payload) {
   return res.json();
 }
 
+// Send a local file (PDF / image / any document) with an optional caption, via Green API sendFileByUpload.
+async function sendFile(env, chatId, filePath, caption) {
+  const url = `${env.GREEN_API_URL}/waInstance${env.GREEN_API_INSTANCE}/sendFileByUpload/${env.GREEN_API_TOKEN}`;
+  const buf = fs.readFileSync(filePath);
+  const fd = new FormData();
+  fd.append("chatId", chatId);
+  if (caption) fd.append("caption", caption);
+  fd.append("file", new Blob([buf]), path.basename(filePath));
+  const res = await fetch(url, { method: "POST", body: fd });
+  return res.json();
+}
+
+// Copy an attachment into durable storage next to the queue (inside the Second Brain): hitl-files/<id>-<name>.
+function storeFile(qp, id, src) {
+  const dir = path.join(path.dirname(qp), "hitl-files");
+  fs.mkdirSync(dir, { recursive: true });
+  const dest = path.join(dir, `${id}-${path.basename(src)}`);
+  fs.copyFileSync(src, dest);
+  return dest;
+}
+
 function arg(flag) { const i = process.argv.indexOf(flag); return i > -1 ? process.argv[i + 1] : undefined; }
 
 function queuePath(env) {
@@ -94,11 +115,20 @@ if (cmd === "request") {
   const title = process.argv[3];
   if (!title || title.startsWith("--")) { console.error('usage: request "<title>" --action "<action>" [--to <phone>]'); process.exit(1); }
   const action = arg("--action") || title;
+  const file = arg("--file");
   const to = normalize(arg("--to") || env.HITL_OWNER_PHONE);
   if (!to || to === "@c.us") { console.error("missing owner phone: pass --to or set HITL_OWNER_PHONE"); process.exit(1); }
   const q = readQueue(qp);
   const id = nextId(q);
-  const r = await call(env, "sendMessage", { chatId: to, message: approvalMessage(id, title) });
+  // If an attachment is given (e.g. an invoice PDF preview), store it in the brain and send it as the approval message.
+  let storedFile = null, r;
+  if (file) {
+    if (!fs.existsSync(file)) { console.error("file not found:", file); process.exit(1); }
+    storedFile = storeFile(qp, id, file);
+    r = await sendFile(env, to, storedFile, approvalMessage(id, title));
+  } else {
+    r = await call(env, "sendMessage", { chatId: to, message: approvalMessage(id, title) });
+  }
   if (!r.idMessage) { console.error("send failed:", JSON.stringify(r)); process.exit(1); }
   q.tasks.push({
     id, created: nowISO(), updated: nowISO(),
@@ -106,11 +136,12 @@ if (cmd === "request") {
     status: "awaiting_reply",
     chat: to,
     approval_msg_ids: [r.idMessage],
+    file: storedFile,
     reply_text: null, reply_msg_id: null,
     decision: null, note: null,
   });
   writeQueue(qp, q);
-  console.log(JSON.stringify({ ok: true, id, approval_msg_id: r.idMessage, chat: to, queue: qp }, null, 2));
+  console.log(JSON.stringify({ ok: true, id, approval_msg_id: r.idMessage, chat: to, file: storedFile, queue: qp }, null, 2));
 
 } else if (cmd === "poll") {
   const q = readQueue(qp);
@@ -163,7 +194,9 @@ if (cmd === "request") {
   for (const task of q.tasks) {
     if (task.status !== "awaiting_reply") continue;
     if (new Date(task.updated).getTime() > cutoff) continue;
-    const r = await call(env, "sendMessage", { chatId: task.chat, message: approvalMessage(task.id, task.title) });
+    const r = (task.file && fs.existsSync(task.file))
+      ? await sendFile(env, task.chat, task.file, approvalMessage(task.id, task.title))
+      : await call(env, "sendMessage", { chatId: task.chat, message: approvalMessage(task.id, task.title) });
     if (r.idMessage) {
       (task.approval_msg_ids = task.approval_msg_ids || []).push(r.idMessage);
       task.updated = nowISO();

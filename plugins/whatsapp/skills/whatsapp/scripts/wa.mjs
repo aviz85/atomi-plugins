@@ -46,16 +46,36 @@ async function call(env, method, payload) {
 
 function arg(flag) { const i = process.argv.indexOf(flag); return i > -1 ? process.argv[i + 1] : undefined; }
 
+// Send a local file (PDF / image / any document) with optional caption, via Green API sendFileByUpload.
+async function sendFile(env, chatId, filePath, caption) {
+  const url = `${env.GREEN_API_URL}/waInstance${env.GREEN_API_INSTANCE}/sendFileByUpload/${env.GREEN_API_TOKEN}`;
+  const buf = fs.readFileSync(filePath);
+  const fd = new FormData();
+  fd.append("chatId", chatId);
+  if (caption) fd.append("caption", caption);
+  fd.append("file", new Blob([buf]), path.basename(filePath));
+  const res = await fetch(url, { method: "POST", body: fd });
+  return res.json();
+}
+
 const cmd = process.argv[2];
 const env = loadEnv();
 
 if (cmd === "send") {
   const to = arg("--to"), group = arg("--group");
-  const message = process.argv[process.argv.length - 1];
+  const file = arg("--file");
+  const caption = arg("--caption");
   if (!to && !group) { console.error("need --to or --group"); process.exit(1); }
   const chatId = group || normalize(to);
-  const r = await call(env, "sendMessage", { chatId, message });
-  console.log("sent:", r.idMessage || JSON.stringify(r));
+  if (file) {
+    if (!fs.existsSync(file)) { console.error("file not found:", file); process.exit(1); }
+    const r = await sendFile(env, chatId, file, caption);
+    console.log("sent file:", r.idMessage || JSON.stringify(r));
+  } else {
+    const message = process.argv[process.argv.length - 1];
+    const r = await call(env, "sendMessage", { chatId, message });
+    console.log("sent:", r.idMessage || JSON.stringify(r));
+  }
 } else if (cmd === "read") {
   const count = parseInt(arg("--count") || "10", 10);
   const r = await call(env, "lastIncomingMessages", undefined);

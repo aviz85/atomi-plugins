@@ -38,6 +38,14 @@ node scripts/wa.mjs send --group 1203630000000000@g.us "הודעה לקבוצה"
 - `--to` accepts Israeli formats (`0501234567`, `972501234567`) and is normalized.
 - Returns the Green API `idMessage` on success.
 
+## Send a file (PDF / image / document)
+
+```bash
+node scripts/wa.mjs send --to 972501234567 --file /tmp/invoice.pdf --caption "החשבונית שלך"
+```
+
+Works with `--group` too. Any file type (PDF, image, doc) via Green API `sendFileByUpload`.
+
 ## Read recent incoming messages
 
 ```bash
