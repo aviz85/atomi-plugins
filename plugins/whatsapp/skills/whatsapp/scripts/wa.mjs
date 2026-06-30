@@ -63,7 +63,15 @@ if (cmd === "send") {
   for (const m of msgs.slice(0, count)) {
     const who = m.senderName || m.chatId || "?";
     const txt = m.textMessage || m.extendedTextMessage?.text || "[media]";
-    console.log(`- ${who}: ${txt}`);
+    // If this message is a quote-reply, show what it replied to + the quoted message id (stanzaId).
+    if (m.typeMessage === "quotedMessage" || m.quotedMessage) {
+      const stanza = m.extendedTextMessage?.stanzaId || m.quotedMessage?.stanzaId || "?";
+      const quoted = m.quotedMessage?.textMessage || m.quotedMessage?.extendedTextMessage?.text || "";
+      const q = quoted ? ` ⟶ בתגובה ל: "${quoted.slice(0, 80)}"` : "";
+      console.log(`- ${who} [reply id=${m.idMessage} →quoted=${stanza}]: ${txt}${q}`);
+    } else {
+      console.log(`- ${who} [id=${m.idMessage}]: ${txt}`);
+    }
   }
 } else {
   console.error("usage: node wa.mjs send --to <num>|--group <id> \"msg\"  |  read --count N");

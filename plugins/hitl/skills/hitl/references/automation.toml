@@ -1,0 +1,28 @@
+# Codex Automation template - HITL wake every 3 hours.
+# Easiest path: ask Codex to "build an automation" (see SKILL.md) and it creates this for you.
+# To do it by hand: copy into ~/.codex/automations/hitl-check/automation.toml,
+# fix the path in `cwds`, and set created_at/updated_at to the current time in ms.
+
+version = 1
+id = "hitl-check"
+kind = "cron"
+name = "HITL - בדיקת אישורים"
+status = "ACTIVE"
+prompt = """
+התעורר כסוכן ה-HITL.
+1. הרץ: node codex-plugins/plugins/hitl/skills/hitl/scripts/hitl.mjs poll
+   (או הנתיב של הסקיל אצלך, ודא HITL_QUEUE מצביע על קובץ התור במוח השני).
+2. לכל משימה שחזרה אליה תשובה (reply_text): פרש את התשובה -
+   - אישור (כן/מאשר/אוקיי) -> בצע את ה-action של המשימה, ואז: hitl resolve <id> --decision approved
+   - תיקון (תקן: ...) -> החל את התיקון, בצע, ואז: hitl resolve <id> --decision corrected --note "מה שונה"
+   - חסימה (לא/עצור) -> אל תבצע, ואז: hitl resolve <id> --decision blocked
+3. עדכן שורה קריאה בלוג של המוח (08-hitl/log.md): מה נשאל, מה הוחלט, מה בוצע.
+אל תבצע פעולה שמחכה לאישור לפני שהגיעה תשובה מאשרת.
+"""
+rrule = "FREQ=HOURLY;INTERVAL=3"
+model = "gpt-5.4"
+reasoning_effort = "medium"
+execution_environment = "local"
+cwds = ["/REPLACE/WITH/YOUR/PROJECT/PATH"]
+created_at = 0
+updated_at = 0

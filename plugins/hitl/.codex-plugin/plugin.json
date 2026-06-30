@@ -1,0 +1,25 @@
+{
+  "name": "hitl",
+  "version": "1.0.0",
+  "description": "Human-in-the-Loop approval gate. Queues any action that needs the owner's approval, asks on WhatsApp, and acts on the owner's quote-reply (approve / correct / block). Use whenever something must not run without a human decision: payments, invoices, publishing, messaging clients, deletions.",
+  "author": { "name": "AVIZ", "url": "https://atomi.biz" },
+  "homepage": "https://atomi.biz",
+  "license": "MIT",
+  "keywords": ["hitl", "human-in-the-loop", "approval", "whatsapp", "queue", "automation"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "HITL - שער אישור",
+    "shortDescription": "תור משימות שמחכות לאישור אנושי דרך WhatsApp",
+    "longDescription": "פלאגין HITL מוסיף שער אישור אנושי: כל פעולה רגישה (כסף, חשבונית, פרסום, הודעה ללקוח, מחיקה) נכנסת לתור, והבעלים מקבל הודעת WhatsApp ומאשר/מתקן/חוסם בתגובת ציטוט (Reply). אוטומציה מעירה את הסוכן כל כמה שעות, הוא קורא את התשובות ומבצע. ההתאמה בין תשובה למשימה מדויקת לפי מזהה ההודעה שצוטטה.",
+    "developerName": "AVIZ",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://atomi.biz",
+    "defaultPrompt": [
+      "כל פעולה שדורשת אישור - תשלח לי בקשת אישור בוואטסאפ",
+      "התעורר, בדוק אם עניתי לבקשות האישור, ובצע לפי התשובות",
+      "הצג לי את כל המשימות שמחכות לאישור"
+    ],
+    "brandColor": "#B91C1C"
+  }
+}

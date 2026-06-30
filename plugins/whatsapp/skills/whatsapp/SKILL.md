@@ -44,6 +44,14 @@ node scripts/wa.mjs send --group 1203630000000000@g.us "הודעה לקבוצה"
 node scripts/wa.mjs read --count 10
 ```
 
+Each line shows the message id. If a message is a **quote-reply** (the user used Reply), it also shows the quoted message id (`stanzaId`) and a snippet of what it replied to:
+
+```
+- אביץ [reply id=3EB0... →quoted=3EB0AA...]: כן מאשר ⟶ בתגובה ל: "בקשת אישור · משימה T1 ..."
+```
+
+So you can tell which message an answer is replying to. This is how approvals are matched to requests (see the HITL plugin, which automates it).
+
 ## Rules
 
 - Hebrew messages: keep it natural, no markdown. Start lines with a Hebrew letter where possible (a leading digit/dash/emoji can break RTL).
